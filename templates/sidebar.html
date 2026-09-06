@@ -1,0 +1,50 @@
+<aside id='sidebar' class='sidebar' role='navigation' aria-label='Main navigation'>
+    <div class='sidebar-header'>
+        <a href='/' class='logo' aria-label='MathVault Home'>
+            <svg class='logo-icon' viewBox='0 0 32 32' fill='none' aria-hidden='true'>
+                <rect width='32' height='32' rx='8' fill='currentColor'/>
+                <path d='M8 16L14 22L24 10' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/>
+            </svg>
+            <span class='logo-text'>MathVault</span>
+        </a>
+    </div>
+    <nav class='sidebar-nav' aria-label='Problem categories'>
+        <div class='nav-section'>
+        <span class='nav-section-title'>Derivatives</span>
+        <ul class='nav-list' role='list'>
+            <li><a href='/derivatives/easy' class='nav-link' data-difficulty='easy'>
+                <span class='nav-link-label'>Easy</span>
+                <span class='nav-link-badge' aria-label='Easy problems'>{{ counts.easy_derivative }}</span>
+            </a></li>
+            <li><a href='/derivatives/medium' class='nav-link' data-difficulty='medium'>
+                <span class='nav-link-label'>Medium</span>
+                <span class='nav-link-badge' aria-label='Medium problems'>{{ counts.medium_derivative }}</span>
+            </a></li>
+        </ul>
+    </div>
+    <div class='nav-section'>
+        <span class='nav-section-title'>Integrals</span>
+        <ul class='nav-list' role='list'>
+            <li><a href='/integrals/beginner' class='nav-link' data-difficulty='beginner'>
+                <span class='nav-link-label'>Beginner</span>
+                <span class='nav-link-badge' aria-label='Beginner problems'>{{ counts.beginner_integral }}</span>
+            </a></li>
+            <li><a href='/integrals/easy' class='nav-link' data-difficulty='easy'>
+                <span class='nav-link-label'>Easy</span>
+                <span class='nav-link-badge' aria-label='Easy problems'>{{ counts.easy_integral }}</span>
+            </a></li>
+        </ul>
+    </div>
+    </nav>
+    <div class='sidebar-footer'>
+        <button id='theme-toggle' class='theme-toggle' aria-label='Toggle dark mode' type='button'>
+            <svg class='icon-sun' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'>
+                <circle cx='12' cy='12' r='5'/>
+                <path d='M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42'/>
+            </svg>
+            <svg class='icon-moon' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'>
+                <path d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/>
+            </svg>
+        </button>
+    </div>
+</aside>

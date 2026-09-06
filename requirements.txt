@@ -1,0 +1,3 @@
+Flask
+libsql-client
+python-dotenv

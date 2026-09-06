@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MathVault - Archive of calculus problems">
+    <title>MathVault</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+       .math-scroll-area {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.2rem;
+        line-height: 1.4;
+        color: var(--color-text);
+    }
+    .math-wrapper {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }   
+    </style>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+</head>
+<body>
+    <aside id="sidebar" class="sidebar" role="navigation" aria-label="Main navigation">
+        <div class="sidebar-header">
+            <a href="/" class="logo" aria-label="MathVault Home">
+                <svg class="logo-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                    <rect width="32" height="32" rx="8" fill="currentColor"/>
+                    <path d="M8 16L14 22L24 10" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="logo-text">MathVault</span>
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav" aria-label="Problem categories">
+            <div class="nav-section">
+                <span class="nav-section-title">Derivatives</span>
+                <ul class="nav-list" role="list">
+                    <li><a href="/derivatives/easy" class="nav-link" data-difficulty="easy"><span class="nav-link-label">Easy</span><span class="nav-link-badge" aria-label="Easy problems">{{ counts.easy_derivative }}</span></a></li>
+                    <li><a href="/derivatives/medium" class="nav-link" data-difficulty="medium"><span class="nav-link-label">Medium</span><span class="nav-link-badge" aria-label="Medium problems">{{ counts.medium_derivative }}</span></a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-section-title">Integrals</span>
+                <ul class="nav-list" role="list">
+                    <li><a href="/integrals/beginner" class="nav-link" data-difficulty="beginner">
+                        <span class="nav-link-label">Beginner</span>
+                        <span class="nav-link-badge" aria-label="Beginner problems">{{ counts.beginner_integral }}</span>
+                    </a></li>
+                    <li><a href="/integrals/easy" class="nav-link" data-difficulty="easy">
+                        <span class="nav-link-label">Easy</span>
+                        <span class="nav-link-badge" aria-label="Easy problems">{{ counts.easy_integral }}</span>
+                    </a></li>
+                </ul>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" type="button">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </aside>
+
+    <main id="main-content" class="main-content" role="main">
+        <div class="hero">
+            <h1 class="hero-title">{{ title }}</h1>
+            <p class="hero-subtitle">Explore the newest calculus challenges curated just for you.</p>
+            
+        </div>
+
+        <section class="problems-section" aria-label="Problems list">
+            {% if not problems %}
+            <div class="empty-state" role="status">
+                <div class="empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="12" width="48" height="40" rx="4"/><path d="M16 20h32M16 28h24M16 36h16"/></svg>
+                </div>
+                <h2 class="empty-title">No problems yet</h2>
+                <p class="empty-description">This category is empty. Run your scraper to fill the vault with problems.</p>
+                <button class="btn btn-primary" onclick="location.reload()" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    <span>Refresh</span>
+                </button>
+            </div>
+            {% else %}
+            <div class="problems-grid" role="list">
+                {% for p in problems %}
+
+<a href="{{ url_for('problem_detail', problem_id=p.id) }}" class="problem-link">
+                <article class="problem-card{% if p.large %} large{% endif %}" role="listitem" style="--delay: {{ loop.index0 * 60 }}ms">
+                    <span class="date-badge">{{ p.date }}</span>
+                    <div class="math-scroll-area">
+                        $${{ p.latex }}$$
+                    </div>
+                </article>
+</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script>
+        (function() {
+            'use strict';
+            
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const STORAGE_KEY = 'mathvault-theme';
+            
+            function getPreferredTheme() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) return stored;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            function applyTheme(theme) {
+                html.setAttribute('data-theme', theme);
+                localStorage.setItem(STORAGE_KEY, theme);
+            }
+            
+            function initTheme() {
+                applyTheme(getPreferredTheme());
+            }
+            
+            themeToggle?.addEventListener('click', () => {
+                const current = html.getAttribute('data-theme');
+                applyTheme(current === 'dark' ? 'light' : 'dark');
+            });
+            
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem(STORAGE_KEY)) {
+                    applyTheme(e.matches ? 'dark' : 'light');
+                }
+            });
+            
+            document.querySelectorAll('.btn-copy').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const latex = btn.dataset.latex;
+                    try {
+                        await navigator.clipboard.writeText(latex);
+                        btn.classList.add('copied');
+                        btn.querySelector('span').textContent = 'Copied!';
+                        setTimeout(() => {
+                            btn.classList.remove('copied');
+                            btn.querySelector('span').textContent = 'Copy LaTeX';
+                        }, 2000);
+                    } catch (e) {
+                        console.error('Copy failed:', e);
+                    }
+                });
+            });
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.problem-card').forEach(card => {
+                card.style.animationPlayState = 'paused';
+                card.style.background = 'var(--color-bg-card)';
+                card.style.backdropFilter = 'blur(10px)';
+                card.style.borderRadius = '12px';
+                card.style.padding = '1.5rem';
+                card.style.transition = 'all 0.3s ease';
+                observer.observe(card);
+            });
+            
+            initTheme();
+        })();
+    </script>
+</body>
+</html>

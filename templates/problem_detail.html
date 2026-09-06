@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<aside id="sidebar" class="sidebar" role="navigation" aria-label="Main navigation">
+    {% include 'sidebar.html' %}
+</aside>
+<main id="main-content" class="main-content problem-detail-page" role="main">
+    <header class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Problem #{{ problem.id }}</h1>
+            <p class="page-subtitle">{{ problem.difficulty|capitalize }} {{ problem.type|capitalize }}</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-ghost">← Back to Home</a>
+        </div>
+    </header>
+    <section class="problem-detail" aria-label="Problem detail">
+        <article class="problem-card{% if problem.large %} large{% endif %}" role="listitem" style="--delay: 0ms;">
+            <span class="date-badge">{{ problem.date }}</span>
+            <div class="math-scroll-area">
+                $${{ problem.latex }}$$
+            </div>
+        </article>
+        {% if problem.hint1 or problem.hint2 %}
+        <div class="hints">
+            <h2>Hints</h2>
+            {% if problem.hint1 %}<p><strong>Hint 1:</strong> {{ problem.hint1 }}</p>{% endif %}
+            {% if problem.hint2 %}<p><strong>Hint 2:</strong> {{ problem.hint2 }}</p>{% endif %}
+        </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}MathVault - Archive of calculus problems{% endblock %}">
+    <title>{% block title %}MathVault{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <aside id="sidebar" class="sidebar" role="navigation" aria-label="Main navigation">
+        {% include 'sidebar.html' %}
+    </aside>
+
+    <main id="main-content" class="main-content {% block main_classes %}{% endblock %}" role="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        (function() {
+            'use strict';
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const STORAGE_KEY = 'mathvault-theme';
+            
+            function getPreferredTheme() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) return stored;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            function applyTheme(theme) {
+                html.setAttribute('data-theme', theme);
+                localStorage.setItem(STORAGE_KEY, theme);
+            }
+            
+            function initTheme() {
+                applyTheme(getPreferredTheme());
+            }
+            
+            themeToggle?.addEventListener('click', () => {
+                const current = html.getAttribute('data-theme');
+                applyTheme(current === 'dark' ? 'light' : 'dark');
+            });
+            
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem(STORAGE_KEY)) {
+                    applyTheme(e.matches ? 'dark' : 'light');
+                }
+            });
+
+            function initCardAnimations() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.animationPlayState = 'running';
+                        }
+                    });
+                }, { threshold: 0.1 });
+                
+                document.querySelectorAll('.problem-card').forEach(card => {
+                    card.style.animationPlayState = 'paused';
+                    observer.observe(card);
+                });
+            }
+
+            function initCopyButtons() {
+                document.querySelectorAll('.btn-copy').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const latex = btn.dataset.latex;
+                        try {
+                            await navigator.clipboard.writeText(latex);
+                            btn.classList.add('copied');
+                            btn.querySelector('span').textContent = 'Copied!';
+                            setTimeout(() => {
+                                btn.classList.remove('copied');
+                                btn.querySelector('span').textContent = 'Copy LaTeX';
+                            }, 2000);
+                        } catch (e) {
+                            console.error('Copy failed:', e);
+                        }
+                    });
+                });
+            }
+
+            initTheme();
+            initCardAnimations();
+            initCopyButtons();
+        })();
+    </script>
+    {% block scripts_extra %}{% endblock %}
+</body>
+</html>

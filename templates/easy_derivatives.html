@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta name='description' content='Easy Derivatives - MathVault'>
+    <title>Easy Derivatives</title>
+    <link rel='preconnect' href='https://fonts.googleapis.com'>
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='{{ url_for('static', filename='style.css') }}'>
+    <script src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js' id='MathJax-script' async></script>
+</head>
+<body>
+    {% include 'sidebar.html' %}
+    <main id='main-content' class='main-content' role='main'>
+        <header class='page-header'>
+            <div class='header-content'>
+                <h1 class='page-title'>Easy Derivatives</h1>
+                <p class='page-subtitle'>Curated easy-level derivative problems</p>
+            </div>
+            <div class='header-actions'>
+                <span class='problem-count' aria-live='polite'>{{ problems|length }} problem{{ 's' if problems|length != 1 else '' }}</span>
+                <div class="filter-wrapper"><select class="filter-select"><option>Placeholder 1</option><option>Placeholder 2</option><option>Placeholder 3</option></select></div>
+            </div>
+        </header>
+        <section class='problems-section' aria-label='Problems list'>
+            {% if not problems %}
+            <div class='empty-state' role='status'>
+                <div class='empty-icon' aria-hidden='true'>
+                    <svg viewBox='0 0 64 64' fill='none' stroke='currentColor' stroke-width='1.5'><rect x='8' y='12' width='48' height='40' rx='4'/><path d='M16 20h32M16 28h24M16 36h16'/></svg>
+                </div>
+                <h2 class='empty-title'>No easy derivative problems yet</h2>
+                <p class='empty-description'>Run your scraper to add easy derivative problems.</p>
+                <button class='btn btn-primary' onclick='location.reload()' type='button'>
+                    <svg class='btn-icon' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'>
+                        <path d='M23 4v6h-6'/>
+                        <path d='M1 20v-6h6'/>
+                        <path d='M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15'/>
+                    </svg>
+                    <span>Refresh</span>
+                </button>
+            </div>
+            {% else %}
+            <div class='problems-list' role='list'>
+                {% for p in problems %}
+                <a href="{{ url_for('problem_detail', problem_id=p.id) }}" class="problem-link">
+                    <article class="problem-card{% if p.large %} large{% endif %}" role="listitem" style="--delay: {{ loop.index0 * 60 }}ms">
+                        <span class="date-badge">{{ p.date }}</span>
+                        <div class="math-scroll-area">
+                            $${{ p.latex }}$$
+                        </div>
+                    </article>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+    </main>
+    <script>
+        (function() {
+            'use strict';
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const STORAGE_KEY = 'mathvault-theme';
+            function getPreferredTheme() { const stored = localStorage.getItem(STORAGE_KEY); if (stored) return stored; return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+            function applyTheme(theme) { html.setAttribute('data-theme', theme); localStorage.setItem(STORAGE_KEY, theme); }
+            function initTheme() { applyTheme(getPreferredTheme()); }
+            themeToggle?.addEventListener('click', () => { const current = html.getAttribute('data-theme'); applyTheme(current === 'dark' ? 'light' : 'dark'); });
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => { if (!localStorage.getItem(STORAGE_KEY)) { applyTheme(e.matches ? 'dark' : 'light'); } });
+            const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.style.animationPlayState = 'running'; } }); }, { threshold: 0.1 });
+            document.querySelectorAll('.problem-card').forEach(card => { card.style.animationPlayState = 'paused'; observer.observe(card); });
+            initTheme();
+        })();
+    </script>
+</body>
+</html>

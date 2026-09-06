@@ -1,0 +1,404 @@
+/*
+  MathVault Modern UI
+  -------------------------------------------------
+  • Uses CSS custom properties for light & dark themes
+  • Glassmorphism cards with subtle blur
+  • Responsive layout with CSS Grid & Flexbox
+  • Smooth hover & focus transitions
+  • Improved typography (Inter & JetBrains Mono)
+*/
+
+:root {
+  --sidebar-width: 260px;
+  /* Light theme */
+  --color-bg: #f5f7fa;
+  --color-bg-card: rgba(255, 255, 255, 0.85);
+  --color-surface: #ffffff;
+  --color-primary: #2c3e50;
+  --color-primary-dark: #1a252f;
+  --color-accent: #3498db;
+  --color-accent-dark: #2980b9;
+  --color-text: #2c3e50;
+  --color-muted: #7f8c8d;
+  --color-border: rgba(0,0,0,0.1);
+}
+[data-theme="dark"] {
+  --color-bg: #121212;
+  --color-bg-card: rgba(30,30,30,0.85);
+  --color-surface: #1e1e1e;
+  --color-primary: #ecf0f1;
+  --color-primary-dark: #bdc3c7;
+  --color-accent: #3498db;
+  --color-accent-dark: #2980b9;
+  --color-text: #ecf0f1;
+  --color-muted: #95a5a6;
+  --color-border: rgba(255,255,255,0.1);
+}
+
+/* Global resets & base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  display: flex;
+  overflow-x: hidden;
+}
+
+/* Sidebar */
+#sidebar {
+  width: var(--sidebar-width, 260px);
+  background: var(--color-primary);
+  color: var(--color-primary-dark);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+/* Dark scrollbar for math scroll area */
+/* Light scrollbar for math scroll area */
+.math-scroll-area {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #aaa #ddd; /* thumb and track */
+}
+.math-scroll-area::-webkit-scrollbar {
+  height: 8px; /* horizontal scrollbar height */
+}
+.math-scroll-area::-webkit-scrollbar-track {
+  background: #ddd;
+}
+.math-scroll-area::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 4px;
+}
+/* Ensure overflow hidden still works */
+/* Ensure overflow hidden still works */
+.math-scroll-area {
+  overflow-x: auto;
+}
+
+/* Dark scrollbar for math scroll area */
+[data-theme="dark"] .math-scroll-area {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #555 #333; /* thumb and track */
+}
+[data-theme="dark"] .math-scroll-area::-webkit-scrollbar {
+  height: 8px; /* horizontal scrollbar height */
+}
+[data-theme="dark"] .math-scroll-area::-webkit-scrollbar-track {
+  background: #333;
+}
+[data-theme="dark"] .math-scroll-area::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+#sidebar .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+}
+#sidebar .logo-icon {
+  width: 32px;
+  height: 32px;
+  fill: var(--color-primary-dark);
+}
+/* Navigation */
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+}
+.nav-section {
+  margin-bottom: 1.5rem;
+}
+.nav-section-title {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+.nav-list {
+  list-style: none;
+}
+.nav-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: background 0.2s, color 0.2s;
+}
+.nav-link:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+.nav-link-badge {
+  background: rgba(255,255,255,0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.75rem;
+}
+/* Theme toggle */
+.theme-toggle {
+  align-self: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary-dark);
+}
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Main content */
+#main-content {
+  margin-left: var(--sidebar-width, 260px);
+  flex: 1;
+  padding: 2rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#main-content.problem-detail-page {
+  margin-left: 7rem;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--color-muted);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-wrapper {
+  margin-left: auto;
+}
+
+.filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 0.4rem;
+  padding: 0.4rem 1.2rem 0.4rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-muted) 50%),
+                    linear-gradient(135deg, var(--color-muted) 50%, transparent 50%);
+  background-position: right 0.6rem top 50%, right 0.2rem top 50%;
+  background-size: 0.5rem 0.5rem, 0.5rem 0.5rem;
+  background-repeat: no-repeat;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.filter-select:hover {
+  border-color: var(--color-accent);
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+.problem-count {
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+/* Problem grid */
+.problems-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+.problem-card {
+  width: 100%;
+  max-width: 800px; /* or desired max */
+  box-sizing: border-box;
+  background: var(--color-bg-card);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-left: 4px solid var(--color-accent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transform: translateY(20px);
+  opacity: 0;
+  animation: slideIn 0.5s forwards;
+}
+
+/* Move all problem‑detail content (header, card, hints) horizontally */
+.problem-detail-page {
+  /* Adjust these values to shift left/right */
+  margin-left: 0;   /* moved to left edge */
+  margin-right: 0;     /* you can set a right margin if needed */
+}
+
+
+/* Left margin for problem detail tiles */
+.problem-detail .problem-card {
+  margin-left: 0;
+}
+
+
+/* Problem type heading spacing */
+.problem-type {
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+
+/* Increased vertical spacing between problem cards */
+.problems-list .problem-card { margin-bottom: 2rem; }
+@keyframes slideIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.problem-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+.date-badge {
+  background: var(--color-surface);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.8rem;
+}
+.difficulty-tag {
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.difficulty-beginner { background: #139dcb; color: #fff; }
+.difficulty-easy { background: #27ae60; color: #fff; }
+.difficulty-medium { background: #f39c12; color: #fff; }
+.difficulty-hard { background: #c0392b; color: #fff; }
+.math-content {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+.problem-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+.btn-ghost:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+.btn-copy.copied {
+  background: var(--color-accent-dark);
+  color: #fff;
+}
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--color-muted);
+}
+.empty-icon {
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+}
+.empty-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-primary);
+}
+.empty-description {
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.active { transform: translateX(0); }
+  #main-content { margin-left: 0; }
+}
+
+/* Utility classes */
+.hidden { display: none !important; }
+
+/* Animations for cards */
+.problem-card[data-delay] {
+  animation-delay: var(--delay);
+}
+
+/* Clickable problem link styling */
+.problem-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
