@@ -13,6 +13,8 @@
     {% block head_extra %}{% endblock %}
 </head>
 <body>
+    <button id="sidebar-toggle" class="btn btn-ghost mobile-toggle" aria-label="Toggle navigation">☰ Menu</button>
+
     <aside id="sidebar" class="sidebar" role="navigation" aria-label="Main navigation">
         {% include 'sidebar.html' %}
     </aside>
@@ -88,9 +90,26 @@
                 });
             }
 
+            function initSidebarToggle() {
+                const sidebarToggle = document.getElementById('sidebar-toggle');
+                const sidebar = document.getElementById('sidebar');
+                if (sidebarToggle && sidebar) {
+                    sidebarToggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        sidebar.classList.toggle('active');
+                    });
+                    document.addEventListener('click', (e) => {
+                        if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+                            sidebar.classList.remove('active');
+                        }
+                    });
+                }
+            }
+
             initTheme();
             initCardAnimations();
             initCopyButtons();
+            initSidebarToggle();
         })();
     </script>
     {% block scripts_extra %}{% endblock %}

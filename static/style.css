@@ -161,7 +161,26 @@ body {
   border-radius: 0.3rem;
   font-size: 0.75rem;
 }
-/* Theme toggle */
+/* Mobile toggle button – hidden on desktop */
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1100;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+
 .theme-toggle {
   align-self: center;
   background: none;
@@ -184,9 +203,7 @@ body {
   gap: 2rem;
 }
 
-#main-content.problem-detail-page {
-  margin-left: 7rem;
-}
+
 
 .page-header {
   display: flex;
@@ -381,12 +398,28 @@ body {
   margin-bottom: 1.5rem;
 }
 
-/* Responsive tweaks */
 @media (max-width: 768px) {
-  #sidebar { transform: translateX(-100%); }
-  #sidebar.active { transform: translateX(0); }
-  #main-content { margin-left: 0; }
+  .mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  #sidebar {
+    transform: translateX(-100%);
+  }
+
+  #sidebar.active {
+    transform: translateX(0);
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+  }
+
+  #main-content {
+    margin-left: 0;
+    padding-top: 3.5rem;
+  }
 }
+
 
 /* Utility classes */
 .hidden { display: none !important; }
