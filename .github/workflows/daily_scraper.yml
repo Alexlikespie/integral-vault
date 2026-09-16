@@ -3,7 +3,7 @@ name: Daily Integral Scraper
 on:
   schedule:
     # Runs every day at 6:00 AM UTC (you can change the time)
-    - cron: '30 2 * * *'
+    - cron: '30 15 * * *'
   workflow_dispatch: # Allows you to manually click a "Run" button anytime
 
 jobs:
