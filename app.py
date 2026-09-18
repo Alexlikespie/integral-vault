@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import libsql_client
 from dotenv import load_dotenv
 
@@ -53,7 +53,7 @@ def index():
         # Mark problems with lengthy LaTeX as large
         problems = [dict(p, large=len(p['latex']) > 120) for p in raw_problems]
     
-    return render_template('index.html', title='Welcome to MathVault', problems=problems)
+    return render_template('index.html', problems=problems)
 
 @app.route('/derivatives/easy')
 def easy_derivatives():
@@ -85,6 +85,29 @@ def problem_detail(problem_id):
     if not problem_res:
         return "Problem not found", 404
     return render_template('problem_detail.html', problem=problem_res[0])
+
+@app.route('/problem/<int:problem_id>/check', methods=['POST'])
+def check_answer(problem_id):
+    problem_res = query_db('SELECT answer FROM problems WHERE id = ?', [problem_id])
+    if not problem_res:
+        return jsonify({'error': 'Problem not found'}), 404
+
+    correct = problem_res[0].get('answer')
+    if correct is None:
+        return jsonify({'error': 'No answer available for this problem'}), 400
+
+    payload = request.get_json(silent=True) or {}
+    raw = payload.get('answer', '')
+    try:
+        user_answer = float(str(raw).strip())
+        correct_answer = float(correct)
+    except (TypeError, ValueError):
+        return jsonify({'correct': False, 'message': 'Enter a numeric answer.'}), 200
+
+    is_correct = abs(user_answer - correct_answer) <= 0.05
+    if is_correct:
+        return jsonify({'correct': True, 'message': 'Correct.'})
+    return jsonify({'correct': False, 'message': 'Incorrect. Try again.'})
 
 if __name__ == '__main__':
     app.run(debug=True)

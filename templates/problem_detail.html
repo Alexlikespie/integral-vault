@@ -1,32 +1,140 @@
 {% extends 'base.html' %}
+
+{% block title %}Problem #{{ problem.id }} — MathVault{% endblock %}
+{% block meta_description %}Solve problem #{{ problem.id }}: {{ problem.difficulty }} {{ problem.type }} from MathVault.{% endblock %}
+{% block main_classes %}problem-detail-page{% endblock %}
+
 {% block content %}
-<aside id="sidebar" class="sidebar" role="navigation" aria-label="Main navigation">
-    {% include 'sidebar.html' %}
-</aside>
-<main id="main-content" class="main-content problem-detail-page" role="main">
-    <header class="page-header">
-        <div class="header-content">
-            <h1 class="page-title">Problem #{{ problem.id }}</h1>
-            <p class="page-subtitle">{{ problem.difficulty|capitalize }} {{ problem.type|capitalize }}</p>
-        </div>
-        <div class="header-actions">
-            <a href="{{ url_for('index') }}" class="btn btn-ghost">← Back to Home</a>
-        </div>
-    </header>
-    <section class="problem-detail" aria-label="Problem detail">
-        <article class="problem-card{% if problem.large %} large{% endif %}" role="listitem" style="--delay: 0ms;">
-            <span class="date-badge">{{ problem.date }}</span>
-            <div class="math-scroll-area">
+<header class="page-header">
+    <span class="page-kicker">{{ problem.type|capitalize }} · {{ problem.difficulty|capitalize }}</span>
+    <h1 class="page-title">Problem #{{ problem.id }}</h1>
+    <p class="page-subtitle">Work it on paper first. Hints wait below when you need them.</p>
+    <div class="header-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-ghost">← Back to today’s edition</a>
+    </div>
+</header>
+
+<section class="problem-detail{% if problem.answer is not none %} has-answer-panel{% endif %}" aria-label="Problem detail">
+    <div class="problem-detail-main">
+        <article class="problem-stage">
+            <div class="problem-stage-meta">
+                <time datetime="{{ problem.date }}">{{ problem.date }}</time>
+                <span>{{ problem.difficulty|capitalize }} {{ problem.type }}</span>
+            </div>
+            <div class="math-scroll-area" role="math" aria-label="Problem statement in mathematical notation">
                 $${{ problem.latex }}$$
             </div>
+            <div class="detail-actions">
+                <button type="button" class="btn btn-ghost btn-copy" data-latex="{{ problem.latex|e }}">
+                    <span>Copy LaTeX</span>
+                </button>
+            </div>
         </article>
+
         {% if problem.hint1 or problem.hint2 %}
         <div class="hints">
-            <h2>Hints</h2>
-            {% if problem.hint1 %}<p><strong>Hint 1:</strong> {{ problem.hint1 }}</p>{% endif %}
-            {% if problem.hint2 %}<p><strong>Hint 2:</strong> {{ problem.hint2 }}</p>{% endif %}
+            <h2 class="hints-title">Hints</h2>
+            {% if problem.hint1 %}
+            <details class="hint-item">
+                <summary>Hint 1</summary>
+                <div class="hint-body">{{ problem.hint1 }}</div>
+            </details>
+            {% endif %}
+            {% if problem.hint2 %}
+            <details class="hint-item">
+                <summary>Hint 2</summary>
+                <div class="hint-body">{{ problem.hint2 }}</div>
+            </details>
+            {% endif %}
         </div>
         {% endif %}
-    </section>
-</main>
+    </div>
+
+    {% if problem.answer is not none %}
+    <aside class="answer-panel" aria-label="Submit your answer">
+        <h2 class="answer-panel-title">Your answer</h2>
+        <p class="answer-panel-hint">Enter a number, then press Enter. Unlimited tries.</p>
+        <form id="answer-form" class="answer-form" action="{{ url_for('check_answer', problem_id=problem.id) }}" method="post" novalidate>
+            <label class="answer-label" for="answer-input">Answer</label>
+            <input
+                id="answer-input"
+                class="answer-input"
+                name="answer"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="e.g. 1.57"
+                aria-describedby="answer-feedback"
+                required
+            >
+            <p id="answer-feedback" class="answer-feedback" role="status" aria-live="polite"></p>
+        </form>
+    </aside>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts_extra %}
+{% if problem.answer is not none %}
+<script>
+(function () {
+    'use strict';
+    var form = document.getElementById('answer-form');
+    var input = document.getElementById('answer-input');
+    var feedback = document.getElementById('answer-feedback');
+    if (!form || !input || !feedback) return;
+
+    var checking = false;
+
+    function setFeedback(message, state) {
+        feedback.textContent = message;
+        feedback.className = 'answer-feedback' + (state ? ' is-' + state : '');
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+    });
+
+    input.addEventListener('keydown', async function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        if (checking) return;
+
+        var raw = input.value.trim();
+        if (!raw) {
+            setFeedback('Enter a numeric answer.', 'error');
+            return;
+        }
+
+        checking = true;
+        input.setAttribute('aria-busy', 'true');
+        setFeedback('Checking…', '');
+
+        try {
+            var res = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ answer: raw })
+            });
+            var data = await res.json();
+            if (!res.ok && data.error) {
+                setFeedback(data.error, 'error');
+            } else if (data.correct) {
+                setFeedback(data.message || 'Correct.', 'success');
+                input.setAttribute('readonly', 'readonly');
+            } else {
+                setFeedback(data.message || 'Incorrect. Try again.', 'error');
+                input.select();
+            }
+        } catch (err) {
+            setFeedback('Could not check your answer. Try again.', 'error');
+        } finally {
+            checking = false;
+            input.removeAttribute('aria-busy');
+        }
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

@@ -3,114 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}MathVault - Archive of calculus problems{% endblock %}">
+    <meta name="description" content="{% block meta_description %}MathVault — a curated archive of calculus problems{% endblock %}">
     <title>{% block title %}MathVault{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,700&family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('mathvault-theme');
+                var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
     {% block head_extra %}{% endblock %}
 </head>
 <body>
-    <button id="sidebar-toggle" class="btn btn-ghost mobile-toggle" aria-label="Toggle navigation">☰ Menu</button>
+    <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <aside id="sidebar" class="sidebar" role="navigation" aria-label="Main navigation">
-        {% include 'sidebar.html' %}
-    </aside>
+    <button id="sidebar-toggle" class="mobile-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        Menu
+    </button>
+    <div id="mobile-backdrop" class="mobile-backdrop" hidden></div>
 
-    <main id="main-content" class="main-content {% block main_classes %}{% endblock %}" role="main">
-        {% block content %}{% endblock %}
+    {% include 'sidebar.html' %}
+
+    <main id="main-content" class="main-content {% block main_classes %}{% endblock %}" tabindex="-1">
+        <div class="content-rail">
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
     <script>
-        (function() {
+        (function () {
             'use strict';
-            const themeToggle = document.getElementById('theme-toggle');
-            const html = document.documentElement;
-            const STORAGE_KEY = 'mathvault-theme';
-            
-            function getPreferredTheme() {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) return stored;
-                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
-            
+            var STORAGE_KEY = 'mathvault-theme';
+            var html = document.documentElement;
+            var themeToggle = document.getElementById('theme-toggle');
+            var sidebar = document.getElementById('sidebar');
+            var sidebarToggle = document.getElementById('sidebar-toggle');
+            var backdrop = document.getElementById('mobile-backdrop');
+
             function applyTheme(theme) {
                 html.setAttribute('data-theme', theme);
-                localStorage.setItem(STORAGE_KEY, theme);
-            }
-            
-            function initTheme() {
-                applyTheme(getPreferredTheme());
-            }
-            
-            themeToggle?.addEventListener('click', () => {
-                const current = html.getAttribute('data-theme');
-                applyTheme(current === 'dark' ? 'light' : 'dark');
-            });
-            
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                if (!localStorage.getItem(STORAGE_KEY)) {
-                    applyTheme(e.matches ? 'dark' : 'light');
+                try { localStorage.setItem(STORAGE_KEY, theme); } catch (e) {}
+                if (themeToggle) {
+                    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
                 }
+            }
+
+            function getPreferredTheme() {
+                try {
+                    var stored = localStorage.getItem(STORAGE_KEY);
+                    if (stored) return stored;
+                } catch (e) {}
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            function setSidebarOpen(open) {
+                if (!sidebar || !sidebarToggle) return;
+                sidebar.classList.toggle('is-open', open);
+                sidebarToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (backdrop) {
+                    backdrop.hidden = !open;
+                    backdrop.classList.toggle('is-visible', open);
+                }
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+
+            themeToggle && themeToggle.addEventListener('click', function () {
+                applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
             });
 
-            function initCardAnimations() {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+                try {
+                    if (!localStorage.getItem(STORAGE_KEY)) applyTheme(e.matches ? 'dark' : 'light');
+                } catch (err) {}
+            });
+
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    setSidebarOpen(!sidebar.classList.contains('is-open'));
+                });
+                backdrop && backdrop.addEventListener('click', function () { setSidebarOpen(false); });
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') setSidebarOpen(false);
+                });
+                sidebar.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', function () { setSidebarOpen(false); });
+                });
+            }
+
+            document.querySelectorAll('.btn-copy').forEach(function (btn) {
+                btn.addEventListener('click', async function () {
+                    var latex = btn.dataset.latex;
+                    try {
+                        await navigator.clipboard.writeText(latex);
+                        btn.classList.add('copied');
+                        var label = btn.querySelector('span');
+                        if (label) {
+                            var original = label.textContent;
+                            label.textContent = 'Copied!';
+                            setTimeout(function () {
+                                btn.classList.remove('copied');
+                                label.textContent = original;
+                            }, 2000);
+                        }
+                    } catch (err) {
+                        console.error('Copy failed:', err);
+                    }
+                });
+            });
+
+            if ('IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
                         if (entry.isIntersecting) {
-                            entry.target.style.animationPlayState = 'running';
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
                         }
                     });
-                }, { threshold: 0.1 });
-                
-                document.querySelectorAll('.problem-card').forEach(card => {
-                    card.style.animationPlayState = 'paused';
+                }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+                document.querySelectorAll('.problem-card').forEach(function (card) {
                     observer.observe(card);
                 });
-            }
-
-            function initCopyButtons() {
-                document.querySelectorAll('.btn-copy').forEach(btn => {
-                    btn.addEventListener('click', async () => {
-                        const latex = btn.dataset.latex;
-                        try {
-                            await navigator.clipboard.writeText(latex);
-                            btn.classList.add('copied');
-                            btn.querySelector('span').textContent = 'Copied!';
-                            setTimeout(() => {
-                                btn.classList.remove('copied');
-                                btn.querySelector('span').textContent = 'Copy LaTeX';
-                            }, 2000);
-                        } catch (e) {
-                            console.error('Copy failed:', e);
-                        }
-                    });
+            } else {
+                document.querySelectorAll('.problem-card').forEach(function (card) {
+                    card.classList.add('is-visible');
                 });
             }
 
-            function initSidebarToggle() {
-                const sidebarToggle = document.getElementById('sidebar-toggle');
-                const sidebar = document.getElementById('sidebar');
-                if (sidebarToggle && sidebar) {
-                    sidebarToggle.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        sidebar.classList.toggle('active');
-                    });
-                    document.addEventListener('click', (e) => {
-                        if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
-                            sidebar.classList.remove('active');
-                        }
-                    });
-                }
-            }
-
-            initTheme();
-            initCardAnimations();
-            initCopyButtons();
-            initSidebarToggle();
+            applyTheme(getPreferredTheme());
         })();
+
+        if (history.scrollRestoration) {
+            history.scrollRestoration = 'manual';
+        }
     </script>
     {% block scripts_extra %}{% endblock %}
 </body>
