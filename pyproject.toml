@@ -1,9 +1,14 @@
 [project]
 name = "integral-vault"
 version = "0.1.0"
-description = "Add your description here"
+description = "MathVault — curated calculus problems archive"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
-    "sympy>=1.14.0",
+    "flask>=3.0.0",
+    "libsql-client>=0.3.1",
+    "python-dotenv>=1.0.0",
 ]
+
+[tool.vercel]
+entrypoint = "app:app"
